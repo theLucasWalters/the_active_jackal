@@ -1,0 +1,7 @@
+# sensitive files
+credentials.*
+
+# other things
+*.json
+*.js
+test.py
