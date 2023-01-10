@@ -1,12 +1,14 @@
 import credentials as c
 import requests
 import json
+import os
 
 
 # I've largely based this code on Twitter's API v2 Python sample code
 
 # bearer token
-bearer_token = c.BEARER_TOKEN
+# bearer_token = c.BEARER_TOKEN # only if `os.environ.get()` doesn't work
+bearer_token = os.environ.get("BEARER_TOKEN")
 
 
 def create_first_url(user):
