@@ -40,11 +40,13 @@ def connect_to_endpoint(url, params):
 
 def make_it_pretty(tweet_dict, user):
     for tweet in tweet_dict["data"]:
+        date_published = tweet["created_at"].split('T')
         print(
             f"""
             \n
 For tweet 'https://twitter.com/{user}/status/{tweet['id']}':
 Text: \"{tweet['text']}\"
+Published on: {date_published[0]} at {date_published[1]}
 Metrics:
     Views:        {tweet['public_metrics']['impression_count']}
     Likes:        {tweet['public_metrics']['like_count']}
@@ -64,14 +66,14 @@ def main():
 
     # our search url
     search_url = "https://api.twitter.com/2/tweets/search/recent"
-    
+
     # query parameters
-    # All recent tweets from an account that are not retweets or replies, with public metrics.
+    # All recent tweets from an account that are not retweets or replies, with public metrics and date of publication.
     # The maximum number of tweets that can be returned is 100
     # The default time period is within the last 7 days
     query_params = {
         'query': f'(from:{user} -is:retweet -is:reply)',
-        'tweet.fields': 'public_metrics',
+        'tweet.fields': 'public_metrics,created_at',
         'max_results': 100
     }
 
