@@ -38,6 +38,28 @@ def connect_to_endpoint(url, params):
     return response.json()
 
 
+def rts_reps():
+    # ask if the user wants to include retweets in the results
+    rts = input("Do you want to include retweets? y/N > ").lower()
+    while not (rts == 'y' or rts == 'n'):
+        rts = input("Must be 'y' or 'n' > ")
+    if rts == 'y':
+        rts_bool = True
+    else:
+        rts_bool = False
+
+    # as if the user wants to include replies in the results
+    reps = input("Do you want to include replies? y/N > ").lower()
+    while not (reps == 'y' or reps == 'n'):
+        reps = input("Must be 'y' or 'n' > ")
+    if reps == 'y':
+        reps_bool = True
+    else:
+        reps_bool = False
+
+    return rts_bool, reps_bool
+
+
 def make_it_pretty(tweet_dict, user):
     for tweet in tweet_dict["data"]:
         date_published = tweet["created_at"].split('T')
@@ -63,19 +85,43 @@ Metrics:
 def main():
     # get the account to look up
     user = input("What's the Twitter account you want to look at? > ")
+    print(f"Retreiving tweets for account: @{user}")
+
+    rts, reps = rts_reps()
 
     # our search url
     search_url = "https://api.twitter.com/2/tweets/search/recent"
 
     # query parameters
-    # All recent tweets from an account that are not retweets or replies, with public metrics and date of publication.
+    # All recent tweets from the passed account, including or excluding retweets and/or replies depending on previous inputs
     # The maximum number of tweets that can be returned is 100
     # The default time period is within the last 7 days
-    query_params = {
-        'query': f'(from:{user} -is:retweet -is:reply)',
-        'tweet.fields': 'public_metrics,created_at',
-        'max_results': 100
-    }
+    if rts and reps:
+        query_params = {
+            'query': f'(from:{user})',
+            'tweet.fields': 'public_metrics,created_at',
+            'max_results': 100
+        }
+    elif not rts and reps:
+        query_params = {
+            'query': f'(from:{user} -is:retweet)',
+            'tweet.fields': 'public_metrics,created_at',
+            'max_results': 100
+        }
+    elif rts and not reps:
+        query_params = {
+            'query': f'(from:{user} -is:reply)',
+            'tweet.fields': 'public_metrics,created_at',
+            'max_results': 100
+        }
+    elif not rts and not reps:
+        query_params = {
+            'query': f'(from:{user} -is:retweet -is:reply)',
+            'tweet.fields': 'public_metrics,created_at',
+            'max_results': 100
+        }
+    else:
+        raise Exception(f"Invalid 'rts' and/or 'reps' value: {rts}, {reps}")
 
     # get the json response
     json_response = connect_to_endpoint(search_url, query_params)
